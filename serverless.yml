@@ -13,8 +13,9 @@ provider:
 functions:
   test-read-s3:
     handler: handler.lambda_handler
-
     events:
-      - http:
-          path: test-read
-          method: get
+      - s3: # in this case, instead of http call, s3 will trigger the event to invoke our lambda function
+          bucket: input-csv
+          event: s3:ObjectCreated:* # the hello function will be invoked automatically upon file uploaded
+          rules:
+            - suffix: .csv
