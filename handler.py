@@ -31,15 +31,18 @@ def csv_handler(event, context):
 
 
 def stream_handler(event, context):
+    print(event)
     table_name = 'mapped_orders'
     db = boto3.resource('dynamodb', region_name='us-east-2')
     table = db.Table(table_name)
 
     records = event['Records']
     for record in records:
-        keys = record['dynamodb']['NewImage']['items']['S']
-        items = ast.literal_eval(keys.encode('ascii'))
-        for row in items:
-            item = {k: v for k, v in row.items() if v}  # remove empty values
-            table.put_item(Item=item)
-            print(item)
+        event_name = record['eventName']
+        if event_name == 'INSERT':
+            keys = record['dynamodb']['NewImage']['items']['S']
+            items = ast.literal_eval(keys.encode('ascii'))
+            for row in items:
+                item = {k: v for k, v in row.items() if v}  # remove empty values
+                table.put_item(Item=item)
+                print(item)
