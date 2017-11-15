@@ -1,0 +1,20 @@
+service: aws-python
+provider:
+  name: aws
+  runtime: python2.7
+  region: us-east-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+        - dynamodb:*
+      Resource: "*"
+
+functions:
+  test-read-s3:
+    handler: handler.lambda_handler
+
+    events:
+      - http:
+          path: test-read
+          method: get
