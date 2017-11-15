@@ -2,25 +2,18 @@ from __future__ import print_function
 
 import boto3
 import csv
+import ast
 
 import logging
 
 print('Loading function')
 
 
-# def put_item(item):
-#     table_name = 'test'
-#     db = boto3.resource('dynamodb', region_name='us-east-2')
-#     table = db.Table(table_name)
-#     table.put_item(Item=item)
-
-
-def lambda_handler(event, context):
+def csv_handler(event, context):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    res = ''
     try:
-        table_name = 'test'
+        table_name = 'raw_orders'
         db = boto3.resource('dynamodb', region_name='us-east-2')
         table = db.Table(table_name)
 
@@ -29,16 +22,24 @@ def lambda_handler(event, context):
         content = bucket.Object('shopee_order.csv').get()['Body'].read().splitlines()
         reader = csv.DictReader(content)
         for row in reader:
-            data = {k: v for k, v in row.items() if v}
+            data = {k: v for k, v in row.items() if v}  # remove empty values
             table.put_item(Item=data)
-            # res += str(data)
 
     except Exception as e:
         print(e)
         raise e
 
-    # response = {
-    #     "statusCode": 200,
-    #     "body": res
-    # }
-    return None
+
+def stream_handler(event, context):
+    table_name = 'mapped_orders'
+    db = boto3.resource('dynamodb', region_name='us-east-2')
+    table = db.Table(table_name)
+
+    records = event['Records']
+    for record in records:
+        keys = record['dynamodb']['NewImage']['items']['S']
+        items = ast.literal_eval(keys.encode('ascii'))
+        for row in items:
+            item = {k: v for k, v in row.items() if v}  # remove empty values
+            table.put_item(Item=item)
+            print(item)
