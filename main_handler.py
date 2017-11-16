@@ -9,6 +9,7 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# hardcoded for now but in final implementation can be passed via environment variables
 raw_table_name = 'raw_orders'
 mapped_table_name = 'mapped_orders'
 region_name = 'us-east-2'
