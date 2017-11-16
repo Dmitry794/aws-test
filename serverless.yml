@@ -1,4 +1,4 @@
-service: aws-python
+service: aws-orders-test
 provider:
   name: aws
   runtime: python2.7
@@ -11,30 +11,26 @@ provider:
       Resource: "*"
 
 functions:
-  test-read-s3:
-    handler: handler.csv_handler
+  process-file:
+    handler: main_handler.file_handler
     events:
-      - s3: # in this case, instead of http call, s3 will trigger the event to invoke our lambda function
-          bucket: input-csv
-          event: s3:ObjectCreated:* # the hello function will be invoked automatically upon file uploaded
-          rules:
-            - suffix: .csv
+      - s3:
+          bucket: input-data-test-111620171510
+          event: s3:ObjectCreated:*
 
-  test-stream:
-    handler: handler.stream_handler
+  process-items:
+    handler: main_handler.items_handler
     events:
       - stream:
           type: dynamodb
-          batchSize: 20
-          startingPosition: TRIM_HORIZON
           arn:
             Fn::GetAtt:
-              - test
+              - raw
               - StreamArn
 
 resources:
   Resources:
-    test:
+    raw:
       Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Delete
       Properties:
@@ -59,11 +55,11 @@ resources:
       Properties:
         AttributeDefinitions:
           -
-            AttributeName: item_id
+            AttributeName: sku
             AttributeType: N
         KeySchema:
           -
-            AttributeName: item_id
+            AttributeName: sku
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
