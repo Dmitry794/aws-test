@@ -2,7 +2,7 @@ service: aws-orders-test
 provider:
   name: aws
   runtime: python2.7
-  region: us-east-2
+  region: us-east-2 # hardcoded for now but in final implementation can be passed via environment variables
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -15,7 +15,7 @@ functions:
     handler: main_handler.file_handler
     events:
       - s3:
-          bucket: input-data-test-111620171510
+          bucket: input-data-test-111620171510 # hardcoded for now but in final implementation can be passed via environment variables
           event: s3:ObjectCreated:*
 
   process-items:
@@ -47,7 +47,7 @@ resources:
           WriteCapacityUnits: 1
         StreamSpecification:
           StreamViewType: NEW_IMAGE
-        TableName: "raw_orders"
+        TableName: "raw_orders" # hardcoded for now but in final implementation can be passed via environment variables
 
     mapped:
       Type: "AWS::DynamoDB::Table"
@@ -64,4 +64,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: "mapped_orders"
+        TableName: "mapped_orders" # hardcoded for now but in final implementation can be passed via environment variables
